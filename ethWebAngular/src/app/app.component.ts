@@ -18,6 +18,10 @@ export class AppComponent {
     this.web3Service.getAccounts().then(accounts => console.log(accounts));
   }
 
+  getCurrentAccount() {
+    this.web3Service.getCurrentAccount().then(accounts => console.log(accounts[0]));
+  }
+
   getContractValue() {
     this.web3Service.getValueFromContract().then(value => console.log(value));
   }

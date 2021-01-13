@@ -8,11 +8,14 @@ import Web3 from 'web3';
 export class Web3Service {
 
   private readonly web3: any;
+  private readonly web3Meta: any;
 
   constructor() {
     this.web3 = new Web3(
       new Web3.providers.HttpProvider("http://127.0.0.1:7545"),
     );
+
+    this.web3Meta = new Web3(window.ethereum);
   }
 
   async getValueFromContract() {
@@ -24,4 +27,9 @@ export class Web3Service {
   async getAccounts() {
     return await this.web3.eth.getAccounts();
   }
+
+  async getCurrentAccount() {
+    return await this.web3Meta.eth.getAccounts();
+  }
+
 }
