@@ -1,0 +1,35 @@
+<div class="create-product">
+  <mat-form-field ngclass="descriptionFormField" appearance="fill">
+    <mat-label>Description</mat-label>
+    <textarea [(ngModel)]="description" matInput></textarea>
+  </mat-form-field>
+  <br>
+
+  <mat-form-field appearance="fill">
+    <mat-label>DEV</mat-label>
+    <input [(ngModel)]="dev" matInput>
+  </mat-form-field>
+  <br>
+
+  <mat-form-field appearance="fill">
+    <mat-label>REV</mat-label>
+    <input [(ngModel)]="rev" matInput>
+  </mat-form-field>
+  <br>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Domain</mat-label>
+    <input [(ngModel)]="domain" matInput>
+  </mat-form-field>
+  <br>
+
+  <!--<mat-form-field appearance="fill">-->
+    <!--<mat-label>Manager</mat-label>-->
+    <!--<input [(ngModel)]="manager" matInput>-->
+  <!--</mat-form-field>-->
+  <!--<br>-->
+
+  <button (click)="createProduct()" mat-flat-button color="primary">Create product</button>
+
+
+</div>

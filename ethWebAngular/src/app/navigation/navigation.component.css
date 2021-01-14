@@ -1,0 +1,13 @@
+app-create-product {
+  margin-top: 50px;
+  display: flex;
+  justify-content:center;
+}
+
+::ng-deep.mat-tab-body-wrapper {
+  height: 100%;
+}
+
+.mat-tab-group {
+  height: 100%;
+}

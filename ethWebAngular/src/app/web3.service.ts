@@ -1,6 +1,8 @@
 import {Injectable} from '@angular/core';
 
 import Web3 from 'web3';
+import {User} from "./user.model";
+import {UserType} from "./user-type.enum";
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +17,7 @@ export class Web3Service {
       new Web3.providers.HttpProvider("http://127.0.0.1:7545"),
     );
 
-    this.web3Meta = new Web3(window.ethereum);
+    // this.web3Meta = new Web3(window.ethereum);
   }
 
   async getValueFromContract() {
@@ -32,4 +34,13 @@ export class Web3Service {
     return await this.web3Meta.eth.getAccounts();
   }
 
+  getCurrentUser() {
+    //get from smart contract
+    return {
+      name: 'name',
+      expertise: 'all',
+      reputation: 9999,
+      type: UserType.MANAGER
+    } as User;
+  }
 }
