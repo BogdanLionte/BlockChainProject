@@ -1,0 +1,8 @@
+ <p>Input {{data.inputName}}</p>
+  <mat-form-field>
+    <mat-label>{{data.inputName}}</mat-label>
+    <input matInput [(ngModel)]="data.input" >
+  </mat-form-field>
+<div mat-dialog-actions>
+  <button mat-button [mat-dialog-close]="data.input" cdkFocusInitial>Ok</button>
+</div>

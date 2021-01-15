@@ -1,0 +1,14 @@
+<div ngClass="freelancers-list">
+
+  <mat-list-item *ngFor="let freelancer of freelancers">
+    Name: {{freelancer.name}}
+    <br>
+    Expertise: {{freelancer.expertise}}
+    <br>
+    Reputation: {{freelancer.reputation}}
+    <br>
+    <button mat-flat-button color="primary" (click)="selectFreelancer(freelancer)">Select freelancer</button>
+
+  </mat-list-item>
+
+</div>

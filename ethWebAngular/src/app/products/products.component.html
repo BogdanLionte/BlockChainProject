@@ -1,0 +1,23 @@
+<div ngClass="products-list">
+
+  <mat-list-item *ngFor="let product of products">
+    Description: {{product.description}}
+    <br>
+    DEV: {{product.dev}}
+    <br>
+    REV: {{product.rev}}
+    <br>
+    Domain: {{product.domain}}
+    <br>
+    Manager: {{product.manager.name}}
+    <br>
+
+    <button mat-flat-button color="primary" (click)="applyForProduct(product)">Apply</button>
+    <button mat-flat-button color="primary" (click)="evaluateProduct(product)">Evaluate</button>
+    <button mat-flat-button color="primary" (click)="removeProduct(product)">Remove</button>
+    <button mat-flat-button color="primary" (click)="sendNotification(product.manager)">Send notification</button>
+
+  </mat-list-item>
+
+
+</div>

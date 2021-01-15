@@ -37,7 +37,7 @@ export class Web3Service {
   getCurrentUser() {
     //get from smart contract
     return {
-      name: 'name',
+      name: 'user1',
       expertise: 'all',
       reputation: 9999,
       type: UserType.MANAGER

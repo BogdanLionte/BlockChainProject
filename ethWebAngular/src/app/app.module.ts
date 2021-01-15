@@ -13,12 +13,20 @@ import {FormsModule} from "@angular/forms";
 import {MatButtonModule} from "@angular/material/button";
 import { NavigationComponent } from './navigation/navigation.component';
 import {MatTabsModule} from "@angular/material/tabs";
+import { ProductsComponent } from './products/products.component';
+import {MatListModule} from "@angular/material/list";
+import {MatDialogModule} from "@angular/material/dialog";
+import { InputDialogComponent } from './input-dialog/input-dialog.component';
+import { FreelancersComponent } from './freelancers/freelancers.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     CreateProductComponent,
-    NavigationComponent
+    NavigationComponent,
+    ProductsComponent,
+    InputDialogComponent,
+    FreelancersComponent
   ],
   imports: [
     BrowserModule,
@@ -29,7 +37,9 @@ import {MatTabsModule} from "@angular/material/tabs";
     MatInputModule,
     FormsModule,
     MatButtonModule,
-    MatTabsModule
+    MatTabsModule,
+    MatListModule,
+    MatDialogModule
   ],
   providers: [],
   bootstrap: [AppComponent]
