@@ -7,5 +7,8 @@ export class Product {
   dev: number;
   manager: User;
   domain: string;
+  finalized: boolean;
+  workInProgress: boolean;
+  freelancers: User[];
 
 }

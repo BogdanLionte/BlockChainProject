@@ -1,0 +1,11 @@
+.notifications-list {
+  text-align: center;
+}
+
+::ng-deep.mat-list-item-content {
+  padding-top: 20px;
+}
+
+button {
+  margin: 5px;
+}

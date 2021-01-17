@@ -1,0 +1,13 @@
+<div ngClass="notifications-list">
+
+  <mat-list-item *ngFor="let notification of notifications">
+    Product: {{notification.product.description}}
+    <br>
+    Result: {{notification.result}}
+    <br>
+    <button mat-flat-button color="primary" (click)="approveProduct(notification.product)">Approve product</button>
+    <button mat-flat-button color="primary" (click)="rejectProduct(notification.product)">Reject product</button>
+
+  </mat-list-item>
+
+</div>

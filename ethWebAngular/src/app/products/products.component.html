@@ -12,12 +12,22 @@
     Manager: {{product.manager.name}}
     <br>
 
-    <button mat-flat-button color="primary" (click)="applyForProduct(product)">Apply</button>
-    <button mat-flat-button color="primary" (click)="evaluateProduct(product)">Evaluate</button>
-    <button mat-flat-button color="primary" (click)="removeProduct(product)">Remove</button>
-    <button mat-flat-button color="primary" (click)="sendNotification(product.manager)">Send notification</button>
+    <p *ngIf="product.finalized" style="color: #1afc7d">Finalized by team:
+      <span *ngFor="let freelancer of product.freelancers">
+        {{freelancer.name}}
+      </span></p>
+
+    <p *ngIf="product.workInProgress" style="color: orange;">In progress by team:
+    <span *ngFor="let freelancer of product.freelancers">
+      {{freelancer.name}}
+    </span>  </p>
+
+    <button *ngIf="!product.finalized && !product.workInProgress" mat-flat-button color="primary" (click)="applyForProduct(product)">Apply</button>
+    <button *ngIf="product.finalized" mat-flat-button color="primary" (click)="evaluateProduct(product)">Evaluate</button>
+    <button *ngIf="!product.finalized" mat-flat-button color="primary" (click)="removeProduct(product)">Remove</button>
+    <button *ngIf="!product.finalized && product.workInProgress" mat-flat-button color="primary" (click)="sendNotification(product.manager)">Send notification</button>
+    <button *ngIf="!product.finalized && !product.workInProgress" mat-flat-button color="primary" (click)="financeProduct(product)">Finance</button>
 
   </mat-list-item>
-
 
 </div>

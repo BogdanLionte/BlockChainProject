@@ -15,9 +15,11 @@ export class ProductsComponent implements OnInit {
 
   products: Product[] = [];
   inputDev: number;
+  inputRev: number;
 
   constructor(public web3Service: Web3Service,
-              public dialog: MatDialog) { }
+              public dialog: MatDialog) {
+  }
 
   ngOnInit(): void {
 
@@ -26,12 +28,27 @@ export class ProductsComponent implements OnInit {
       dev: 10,
       rev: 10,
       domain: 'domain1',
+      finalized: true,
       manager: {
         name: 'manager1',
         expertise: 'all',
         reputation: 9999,
         type: UserType.MANAGER
-      } as User
+      } as User,
+      freelancers: [
+        {
+          name: 'freelancer1',
+          expertise: 'all',
+          reputation: 9999,
+          type: UserType.FREELANCER
+        } as User,
+        {
+          name: 'freelancer2',
+          expertise: 'all',
+          reputation: 9999,
+          type: UserType.FREELANCER
+        } as User
+      ]
     } as Product);
 
     this.products.push({
@@ -39,12 +56,43 @@ export class ProductsComponent implements OnInit {
       dev: 20,
       rev: 20,
       domain: 'domain2',
+      finalized: false,
+      workInProgress: true,
       manager: {
         name: 'manager2',
         expertise: 'all2',
         reputation: 2,
         type: UserType.MANAGER
-      } as User
+      } as User,
+      freelancers: [
+        {
+          name: 'freelancer1',
+          expertise: 'all',
+          reputation: 9999,
+          type: UserType.FREELANCER
+        } as User,
+        {
+          name: 'freelancer2',
+          expertise: 'all',
+          reputation: 9999,
+          type: UserType.FREELANCER
+        } as User
+      ]
+    } as Product);
+
+    this.products.push({
+      description: 'product3',
+      dev: 30,
+      rev: 30,
+      domain: 'domain3',
+      finalized: false,
+      workInProgress: false,
+      manager: {
+        name: 'manager2',
+        expertise: 'all2',
+        reputation: 2,
+        type: UserType.MANAGER
+      } as User,
     } as Product);
 
   }
@@ -64,7 +112,6 @@ export class ProductsComponent implements OnInit {
         product.description + ' with dev ', this.inputDev);
       product.dev -= result;
     });
-
 
   }
 
@@ -90,5 +137,23 @@ export class ProductsComponent implements OnInit {
       console.log('sending message:', result, ' to manager ', manager.name);
 
     });
+  }
+
+  financeProduct(product: Product) {
+    const dialogRef = this.dialog.open(InputDialogComponent, {
+      data: {
+        inputName: 'REV'
+      },
+      width: '250px',
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('The dialog was closed');
+      this.inputRev = result;
+      console.log('financer ' + this.web3Service.getCurrentUser().name + ' is financing product ' +
+        product.description + ' with rev ', this.inputRev);
+      product.rev += parseInt(result);
+    });
+
   }
 }

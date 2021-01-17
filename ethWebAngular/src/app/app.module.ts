@@ -18,6 +18,7 @@ import {MatListModule} from "@angular/material/list";
 import {MatDialogModule} from "@angular/material/dialog";
 import { InputDialogComponent } from './input-dialog/input-dialog.component';
 import { FreelancersComponent } from './freelancers/freelancers.component';
+import { NotificationsComponent } from './notifications/notifications.component';
 
 @NgModule({
   declarations: [
@@ -26,7 +27,8 @@ import { FreelancersComponent } from './freelancers/freelancers.component';
     NavigationComponent,
     ProductsComponent,
     InputDialogComponent,
-    FreelancersComponent
+    FreelancersComponent,
+    NotificationsComponent,
   ],
   imports: [
     BrowserModule,
