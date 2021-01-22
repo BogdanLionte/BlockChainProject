@@ -1,16 +1,16 @@
-pragma solidity >=0.4.22 <0.7.0;
+pragma solidity >=0.7.0 <0.8.0;
 
 pragma experimental ABIEncoderV2;
 
 contract Token {
 
-    mapping(address => uint256) balances;
+    mapping(address => uint256) private balances;
 
-    mapping(address => mapping (address => uint256)) allowed;
+    mapping(address => mapping (address => uint256)) private allowed;
 
     uint256 _totalSupply;
 
-    constructor(uint256 total) public {
+    constructor(uint256 total) {
         _totalSupply = total;
         balances[msg.sender] = _totalSupply;
     }
@@ -57,7 +57,6 @@ contract Token {
     event Approval(address indexed _owner, address indexed _spender, uint256 _value);
 
 }
-
 
 
 
