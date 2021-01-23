@@ -1,6 +1,6 @@
 pragma solidity >=0.7.0 <0.8.0;
-import "Token.sol";
-import "String_Utils.sol";
+import "./Token.sol";
+import "./String_Utils.sol";
 
 abstract contract  User {
 

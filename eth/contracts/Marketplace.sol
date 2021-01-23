@@ -1,15 +1,15 @@
 pragma solidity >=0.7.0 <0.8.0;
 
-import "User.sol";
-import "Freelancer.sol";
-import "Financer.sol";
-import "Evaluator.sol";
-import "Product.sol";
-import "Product_Factory.sol";
-import "Manager_Factory.sol";
-import "Evaluator_Factory.sol";
-import "Freelancer_Factory.sol";
-import "Financer_Factory.sol";
+import "./User.sol";
+import "./Freelancer.sol";
+import "./Financer.sol";
+import "./Evaluator.sol";
+import "./Product.sol";
+import "./Product_Factory.sol";
+import "./Manager_Factory.sol";
+import "./Evaluator_Factory.sol";
+import "./Freelancer_Factory.sol";
+import "./Financer_Factory.sol";
 
 pragma experimental ABIEncoderV2;
 
@@ -85,23 +85,27 @@ contract Marketplace {
         valid_users["evaluator_2"] = true;
     }
 
-    function get_user_json(string memory name) public view returns(string memory) {
+    function get_user_json(string memory name) public view returns (string memory) {
         return name_users[name].to_string();
     }
 
-    function get_product_json(string memory name) public view returns(string memory) {
+    function getSomething() public view returns (uint) {
+        return 50;
+    }
+
+    function get_product_json(string memory name) public view returns (string memory) {
         return name_products[name].to_string();
     }
 
-    function get_all_usernames() public view returns(string memory) {
+    function get_all_usernames() public view returns (string memory) {
         return s.arr2str(user_names);
     }
 
-    function get_all_product_names() public view returns(string memory) {
+    function get_all_product_names() public view returns (string memory) {
         return s.arr2str(prod_names);
     }
 
-    function create_product(string memory manager_name, string memory product_name, string memory product_description, uint256 dev, uint256 rev, string memory expertise_category) public{
+    function create_product(string memory manager_name, string memory product_name, string memory product_description, uint256 dev, uint256 rev, string memory expertise_category) public {
         require(valid_users[manager_name], "the name you provide must be a user name");
         require(s.compare_strings(name_users[manager_name].user_type(), "MANAGER"), "products can only be created by managers");
         Product prod = pf.create_product(manager_name, product_name, product_description, dev, rev, expertise_category);
@@ -141,7 +145,7 @@ contract Marketplace {
         Product prod = name_products[prod_name];
         string[] memory depositors = prod.get_depositors();
         User sender = name_users[prod.manager()];
-        for(uint i = 0; i < depositors.length; i++) {
+        for (uint i = 0; i < depositors.length; i++) {
             address recipient = address(name_users[depositors[i]]);
             uint amount = prod.get_contribution(depositors[i]);
             sender.transfer(recipient, amount);
@@ -169,14 +173,14 @@ contract Marketplace {
         prod.set_evaluator(evaluator_name);
     }
 
-    function select_team(string memory manager_name, string memory prod_name, string memory team) public{
+    function select_team(string memory manager_name, string memory prod_name, string memory team) public {
         require(valid_products[prod_name], "you must provide a valid product name");
         require(valid_users[manager_name], "you must provide a valid user name");
         require(s.compare_strings("MANAGER", name_users[manager_name].user_type()), "the user you provided is not a manager");
         Product prod = name_products[prod_name];
         require(s.compare_strings(manager_name, prod.manager()), "this is not the right manager for the product");
         string[] memory team_names = s.splitString(team);
-        for(uint i = 0; i < team_names.length; i++) {
+        for (uint i = 0; i < team_names.length; i++) {
             require(valid_users[team_names[i]], "one of the team members is not a valid user");
             require(s.compare_strings("FREELANCER", name_users[team_names[i]].user_type()), "one of the team members is not a freelancer");
         }
@@ -204,7 +208,7 @@ contract Marketplace {
         string[] memory team = prod.get_selected_team();
         User manager = name_users[manager_name];
         require(manager.was_notified(), "the manager was not notified");
-        for(uint i = 0; i < team.length; i++) {
+        for (uint i = 0; i < team.length; i++) {
             User team_member = name_users[team[i]];
             manager.transfer(address(team_member), prod.applicant_amounts(team[i]));
             team_member.increment_reputation();
@@ -234,7 +238,7 @@ contract Marketplace {
         require(name_users[prod.evaluator()].was_notified(), "the evaluator must be notified before the arbitrage");
         string[] memory team = prod.get_selected_team();
         User manager = name_users[prod.manager()];
-        for(uint i = 0; i < team.length; i++) {
+        for (uint i = 0; i < team.length; i++) {
             User team_member = name_users[team[i]];
             manager.transfer(address(team_member), prod.applicant_amounts(team[i]));
             team_member.increment_reputation();

@@ -1,5 +1,5 @@
 pragma solidity >=0.7.0 <0.8.0;
-import "Token.sol";
+import "./Token.sol";
 
 // contract responsible for the initial dissemination of the tokens
 contract TokenManager {

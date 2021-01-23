@@ -1,6 +1,6 @@
 pragma solidity >=0.7.0 <0.8.0;
-import "Evaluator.sol";
-import "TokenManager.sol";
+import "./Evaluator.sol";
+import "./TokenManager.sol";
 
 contract Evaluator_Factory {
 

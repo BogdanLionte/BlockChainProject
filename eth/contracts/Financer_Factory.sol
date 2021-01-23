@@ -1,6 +1,6 @@
 pragma solidity >=0.7.0 <0.8.0;
-import "Financer.sol";
-import "TokenManager.sol";
+import "./Financer.sol";
+import "./TokenManager.sol";
 
 contract Financer_Factory {
 

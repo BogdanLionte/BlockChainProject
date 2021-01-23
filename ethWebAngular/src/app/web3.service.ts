@@ -17,13 +17,23 @@ export class Web3Service {
       new Web3.providers.HttpProvider("http://127.0.0.1:7545"),
     );
 
-    // this.web3Meta = new Web3(window.ethereum);
+    this.web3Meta = new Web3((window as any).ethereum);
   }
 
   async getValueFromContract() {
-    let contractDefinition = require('./../../../eth/build/contracts/TestContract.json');
-    let contract = new this.web3.eth.Contract(contractDefinition['abi'], contractDefinition['networks']['5777']['address']);
-    contract.methods.fundingGoal().call().then(console.log);
+    let contractDefinition;
+    let contract;
+
+    contractDefinition = require('./../../../eth/build/contracts/TestContract.json');
+    contract = new this.web3.eth.Contract(contractDefinition['abi'], contractDefinition['networks']['5777']['address']);
+    contract.methods.getFundingGoal().call().then(console.log);
+
+    contractDefinition = require('./../../../eth/build/contracts/Marketplace.json');
+    contract = new this.web3.eth.Contract(contractDefinition['abi'], contractDefinition['networks']['5777']['address']);
+    console.log(contract);
+    contract.methods.getSomething().call().then(console.log);
+
+
   }
 
   async getAccounts() {
@@ -35,7 +45,7 @@ export class Web3Service {
   }
 
   getCurrentUser() {
-    //get from smart contract
+    //get from smart contract based on currentAccount address
     return {
       name: 'user1',
       expertise: 'all',
