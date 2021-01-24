@@ -18,13 +18,15 @@ contract Marketplace {
 
     mapping(address => User) private addresses_users;
     mapping(string => Product) private name_products;
-    string[] public prod_names;
-    address[] public user_addresses;
+    string[] private prod_names;
+    address[] private user_addresses;
     mapping(address => bool) private valid_addresses;
     mapping(string => bool) private valid_products;
-    mapping(address => Notification_Struct[]) public notifications;
+    mapping(address => Notification_Struct[]) private notifications;
     mapping(uint256 => uint) private notification_indexes;
     uint256 current_notification_id;
+    User_Struct[] private user_structs;
+    Product_Struct[] private prod_structs;
 
     Product_Factory private pf;
     Manager_Factory private mf;
@@ -111,6 +113,7 @@ contract Marketplace {
         name_products[product_name] = prod;
         prod_names.push(product_name);
         valid_products[product_name] = true;
+        prod_structs.push(get_product_struct(product_name));
     }
 
     function deposit(string memory prod_name, address financer_addr, uint256 amount) public {
@@ -167,11 +170,9 @@ contract Marketplace {
         prod.set_evaluator(evaluator_addr);
     }
 
-    function select_team(address manager_addr, string memory prod_name, address[] memory team) public{
+    function select_team(string memory prod_name, address[] memory team) public{
         require(valid_products[prod_name], "you must provide a valid product name");
-        require(is_user_valid(manager_addr, 0), "invalid user addr");
         Product prod = name_products[prod_name];
-        require(manager_addr == prod.manager(), "this is not the right manager for the product");
         for(uint i = 0; i < team.length; i++) {
             require(valid_addresses[team[i]], "one of the team members is not a valid user");
             require(addresses_users[team[i]].user_type() == 2, "one of the team members is not a freelancer");
@@ -179,47 +180,38 @@ contract Marketplace {
         prod.select_team(team);
     }
 
-    function notify_manager_of_product(string memory prod_name, address team_member, string memory message) public {
+    function notify_manager_of_product(string memory prod_name, string memory message) public {
         require(valid_products[prod_name], "you must provide a valid product name");
-        require(is_user_valid(team_member, 2), "invalid user addr");
         Product prod = name_products[prod_name];
-        require(prod.is_valid_team_member(team_member), "the user you provided is not part of the team assigned to this product");
         add_notification(prod.manager(), message);
-
     }
 
-    function accept_product(address manager_addr, string memory prod_name, uint256 notification_id) public {
+    function accept_product(string memory prod_name, uint256 notification_id) public {
         require(valid_products[prod_name], "you must provide a valid product name");
-        require(is_user_valid(manager_addr, 0), "invalid user addr");
         Product prod = name_products[prod_name];
-        require(manager_addr == prod.manager(), "you have not provided the right manager");
         address[] memory team = prod.get_selected_team();
-        User manager = addresses_users[manager_addr];
+        User manager = addresses_users[prod.manager()];
         for(uint i = 0; i < team.length; i++) {
             User team_member = addresses_users[team[i]];
             manager.transfer(address(team_member), prod.applicant_amounts(team[i]));
             team_member.increment_reputation();
         }
         prod.finish();
-        remove_notification(manager_addr, notification_id);
+        remove_notification(prod.manager(), notification_id);
     }
 
-    function refuse_product(address manager_addr, string memory prod_name, string memory message, uint256 notification_id) public {
+    function refuse_product(string memory prod_name, string memory message, uint256 notification_id) public {
         require(valid_products[prod_name], "you must provide a valid product name");
-        require(is_user_valid(manager_addr, 0), "invalid user addr");
         Product prod = name_products[prod_name];
         require(prod.evaluator() != address(0), "the evaluator was not set");
-        require(manager_addr == prod.manager(), "you have not provided the right manager");
         add_notification(prod.evaluator(), message);
-        remove_notification(manager_addr, notification_id);
+        remove_notification(prod.manager(), notification_id);
 
     }
 
-    function arbitrage_accept(address evaluator_addr, string memory prod_name, uint256 notification_id) public {
+    function arbitrage_accept(string memory prod_name, uint256 notification_id) public {
         require(valid_products[prod_name], "you must provide a valid product name");
-        require(is_user_valid(evaluator_addr, 3), "invalid user addr");
         Product prod = name_products[prod_name];
-        require(evaluator_addr == prod.evaluator(), "you have not provided the right evaluator");
         address[] memory team = prod.get_selected_team();
         User manager = addresses_users[prod.manager()];
         for(uint i = 0; i < team.length; i++) {
@@ -231,19 +223,37 @@ contract Marketplace {
         address evaluator = address(addresses_users[prod.evaluator()]);
         manager.transfer(evaluator, prod.rev());
         prod.finish();
-        remove_notification(evaluator_addr, notification_id);
+        remove_notification(prod.evaluator(), notification_id);
     }
 
-    function arbitrage_deny(address evaluator_addr, string memory prod_name, uint256 notification_id) public {
+    function arbitrage_deny(string memory prod_name, uint256 notification_id) public {
         require(valid_products[prod_name], "you must provide a valid product name");
-        require(is_user_valid(evaluator_addr, 3), "invalid user addr");
         Product prod = name_products[prod_name];
-        require(evaluator_addr == prod.evaluator(), "you have not provided the right evaluator");
         prod.reset_team();
-        remove_notification(evaluator_addr, notification_id);
+        remove_notification(prod.evaluator(), notification_id);
     }
 
-    function get_user_struct(address user_addr) public view returns (User_Struct memory) {
+    function get_users() public view returns (User_Struct[] memory) {
+        return user_structs;
+    }
+
+    function get_products() public view returns (Product_Struct[] memory) {
+        return prod_structs;
+    }
+
+    function get_notifications(address user_addr) public view returns(Notification_Struct[] memory) {
+        return notifications[user_addr];
+    }
+
+    function get_depositor_amount(string memory prod_name, address depositor_addr) public view returns (uint256) {
+        return name_products[prod_name].deposited_amounts(depositor_addr);
+    }
+
+    function get_applicant_amount(string memory prod_name, address applicant_addr) public view returns (uint256) {
+        return name_products[prod_name].applicant_amounts(applicant_addr);
+    }
+
+    function get_user_struct(address user_addr) private view returns (User_Struct memory) {
         User_Struct memory result;
         User user = addresses_users[user_addr];
         result.name = user.name();
@@ -265,7 +275,7 @@ contract Marketplace {
         return result;
     }
 
-    function get_product_struct(string memory name) public view returns (Product_Struct memory) {
+    function get_product_struct(string memory name) private view returns (Product_Struct memory) {
         Product prod = name_products[name];
         Product_Struct memory result;
         result.name = prod.name();
@@ -281,14 +291,6 @@ contract Marketplace {
         result.total_amount = prod.total_amount();
 
         return result;
-    }
-
-    function get_depositor_amount(string memory prod_name, address depositor_addr) public view returns (uint256) {
-        return name_products[prod_name].deposited_amounts(depositor_addr);
-    }
-
-    function get_applicant_amount(string memory prod_name, address applicant_addr) public view returns (uint256) {
-        return name_products[prod_name].applicant_amounts(applicant_addr);
     }
 
     function compare_strings(string memory a, string memory b) private pure returns (bool) {
@@ -315,6 +317,7 @@ contract Marketplace {
         addresses_users[addr] = user;
         user_addresses.push(addr);
         valid_addresses[addr] = true;
+        user_structs.push(get_user_struct(addr));
     }
 
     function is_user_valid(address addr, uint8 user_type) private view returns (bool) {
