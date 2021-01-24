@@ -1,4 +1,4 @@
-<div ngClass="products-list">
+<div ngClass="products-list" >
 
   <mat-list-item *ngFor="let product of products">
     Description: {{product.description}}
@@ -7,9 +7,13 @@
     <br>
     REV: {{product.rev}}
     <br>
+    Total amount: {{product.totalAmount}}
+    <br>
     Domain: {{product.domain}}
     <br>
     Manager: {{product.manager.name}}
+    <br>
+    State: {{product.state}}
     <br>
 
     <p *ngIf="product.finalized" style="color: #1afc7d">Finalized by team:
@@ -22,11 +26,12 @@
       {{freelancer.name}}
     </span>  </p>
 
-    <button *ngIf="!product.finalized && !product.workInProgress" mat-flat-button color="primary" (click)="applyForProduct(product)">Apply</button>
-    <button *ngIf="product.finalized" mat-flat-button color="primary" (click)="evaluateProduct(product)">Evaluate</button>
-    <button *ngIf="!product.finalized" mat-flat-button color="primary" (click)="removeProduct(product)">Remove</button>
-    <button *ngIf="!product.finalized && product.workInProgress" mat-flat-button color="primary" (click)="sendNotification(product.manager)">Send notification</button>
-    <button *ngIf="!product.finalized && !product.workInProgress" mat-flat-button color="primary" (click)="financeProduct(product)">Finance</button>
+    <button *ngIf="userService.currentUser.type === 'FREELANCER'" mat-flat-button color="primary" (click)="applyForProduct(product)">Apply</button>
+    <button *ngIf="userService.currentUser.type === 'EVALUATOR'" mat-flat-button color="primary" (click)="applyForEvaluatingProduct(product)">Apply for evaluating</button>
+    <button *ngIf="userService.currentUser.type === 'MANAGER' && product.state === 'FINANCING'" mat-flat-button color="primary" (click)="removeProduct(product)">Remove</button>
+    <button *ngIf="userService.currentUser.type === 'FREELANCER'" mat-flat-button color="primary" (click)="sendNotification(product)">Send notification</button>
+    <button *ngIf="userService.currentUser.type === 'FINANCER' && product.state === 'FINANCING'" mat-flat-button color="primary" (click)="financeProduct(product)">Finance</button>
+    <button *ngIf="userService.currentUser.type === 'FINANCER' && product.state === 'FINANCING'" mat-flat-button color="primary" (click)="withdrawFinanceProduct(product)">Withdraw</button>
 
   </mat-list-item>
 

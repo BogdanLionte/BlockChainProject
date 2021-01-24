@@ -1,4 +1,11 @@
-<div class="create-product">
+<div class="create-product" *ngIf="userService.currentUser?.type === 'MANAGER'">
+
+  <mat-form-field appearance="fill">
+    <mat-label>Name</mat-label>
+    <input [(ngModel)]="name" matInput>
+  </mat-form-field>
+  <br>
+
   <mat-form-field ngclass="descriptionFormField" appearance="fill">
     <mat-label>Description</mat-label>
     <textarea [(ngModel)]="description" matInput></textarea>
@@ -23,11 +30,6 @@
   </mat-form-field>
   <br>
 
-  <!--<mat-form-field appearance="fill">-->
-    <!--<mat-label>Manager</mat-label>-->
-    <!--<input [(ngModel)]="manager" matInput>-->
-  <!--</mat-form-field>-->
-  <!--<br>-->
 
   <button (click)="createProduct()" mat-flat-button color="primary">Create product</button>
 

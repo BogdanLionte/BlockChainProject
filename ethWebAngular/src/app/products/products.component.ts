@@ -5,96 +5,41 @@ import {UserType} from "../user-type.enum";
 import {Web3Service} from "../web3.service";
 import {MatDialog} from "@angular/material/dialog";
 import {InputDialogComponent} from "../input-dialog/input-dialog.component";
+import {UserService} from "../user.service";
+import {ProductService} from "../product.service";
+import {ProductState} from "../product-state.enum";
+import {ActivatedRouteSnapshot, Resolve, RouterStateSnapshot} from "@angular/router";
+import {Observable} from "rxjs";
 
 @Component({
   selector: 'app-products',
   templateUrl: './products.component.html',
   styleUrls: ['./products.component.css']
 })
-export class ProductsComponent implements OnInit {
+export class ProductsComponent implements OnInit, Resolve<User> {
 
   products: Product[] = [];
   inputDev: number;
-  inputRev: number;
+  productState = ProductState;
+  userType = UserType;
 
   constructor(public web3Service: Web3Service,
-              public dialog: MatDialog) {
+              public dialog: MatDialog,
+              public userService: UserService,
+              public productService: ProductService) {
   }
 
   ngOnInit(): void {
+    this.userService.getUsers().then(users => {
+      console.log('users', users);
+    });
+  }
 
-    this.products.push({
-      description: 'product1',
-      dev: 10,
-      rev: 10,
-      domain: 'domain1',
-      finalized: true,
-      manager: {
-        name: 'manager1',
-        expertise: 'all',
-        reputation: 9999,
-        type: UserType.MANAGER
-      } as User,
-      freelancers: [
-        {
-          name: 'freelancer1',
-          expertise: 'all',
-          reputation: 9999,
-          type: UserType.FREELANCER
-        } as User,
-        {
-          name: 'freelancer2',
-          expertise: 'all',
-          reputation: 9999,
-          type: UserType.FREELANCER
-        } as User
-      ]
-    } as Product);
-
-    this.products.push({
-      description: 'product2',
-      dev: 20,
-      rev: 20,
-      domain: 'domain2',
-      finalized: false,
-      workInProgress: true,
-      manager: {
-        name: 'manager2',
-        expertise: 'all2',
-        reputation: 2,
-        type: UserType.MANAGER
-      } as User,
-      freelancers: [
-        {
-          name: 'freelancer1',
-          expertise: 'all',
-          reputation: 9999,
-          type: UserType.FREELANCER
-        } as User,
-        {
-          name: 'freelancer2',
-          expertise: 'all',
-          reputation: 9999,
-          type: UserType.FREELANCER
-        } as User
-      ]
-    } as Product);
-
-    this.products.push({
-      description: 'product3',
-      dev: 30,
-      rev: 30,
-      domain: 'domain3',
-      finalized: false,
-      workInProgress: false,
-      manager: {
-        name: 'manager2',
-        expertise: 'all2',
-        reputation: 2,
-        type: UserType.MANAGER
-      } as User,
-    } as Product);
-
+  refreshProducts() {
+    console.log('refresh products from child');
+    this.productService.getAllProducts().then(
+      products => this.products = products
+    );
   }
 
   applyForProduct(product: Product) {
@@ -108,22 +53,31 @@ export class ProductsComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       console.log('The dialog was closed');
       this.inputDev = result;
-      console.log('user ' + this.web3Service.getCurrentUser().name + ' is applying for product ' +
+      console.log('user ' + this.userService.currentUser.name + ' is applying for product ' +
         product.description + ' with dev ', this.inputDev);
+      this.web3Service.applyForProduct(product, result).then(result => console.log('applied for product ' + product +
+      ' with dev ' + result));
       product.dev -= result;
     });
 
   }
 
-  evaluateProduct(product: Product) {
+  acceptProduct(product: Product) {
+
+  }
+
+  rejectProduct(product: Product) {
 
   }
 
   removeProduct(product: Product) {
-
+    this.productService.removeProduct(product).then(result => {
+      console.log('removed product', result);
+      this.refreshProducts();
+    });
   }
 
-  sendNotification(manager: User) {
+  sendNotification(product: Product) {
     const dialogRef = this.dialog.open(InputDialogComponent, {
       data: {
         inputName: 'Message'
@@ -133,8 +87,8 @@ export class ProductsComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       console.log('The dialog was closed');
-
-      console.log('sending message:', result, ' to manager ', manager.name);
+      console.log('sending message:', result, ' to manager ', product.manager.name);
+      this.web3Service.sendNotification(product, result);
 
     });
   }
@@ -142,18 +96,38 @@ export class ProductsComponent implements OnInit {
   financeProduct(product: Product) {
     const dialogRef = this.dialog.open(InputDialogComponent, {
       data: {
-        inputName: 'REV'
+        inputName: 'Amount'
       },
       width: '250px',
     });
 
     dialogRef.afterClosed().subscribe(result => {
       console.log('The dialog was closed');
-      this.inputRev = result;
-      console.log('financer ' + this.web3Service.getCurrentUser().name + ' is financing product ' +
-        product.description + ' with rev ', this.inputRev);
-      product.rev += parseInt(result);
+      this.web3Service.financeProduct(product, result);
     });
 
+  }
+
+  withdrawFinanceProduct(product: Product) {
+    const dialogRef = this.dialog.open(InputDialogComponent, {
+      data: {
+        inputName: 'Amount'
+      },
+      width: '250px',
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('The dialog was closed');
+      this.web3Service.withdrawFinanceProduct(product, result);
+    });
+
+  }
+
+  applyForEvaluatingProduct(product: Product) {
+    this.web3Service.applyForEvaluatingProduct(product);
+  }
+
+  resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<User> | Promise<User> | User {
+    return this.userService.getCurrentUser().then(user => user);
   }
 }

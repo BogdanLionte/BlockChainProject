@@ -5,9 +5,8 @@
     <br>
     Result: {{notification.result}}
     <br>
-    <button mat-flat-button color="primary" (click)="approveProduct(notification.product)">Approve product</button>
-    <button mat-flat-button color="primary" (click)="rejectProduct(notification.product)">Reject product</button>
-
+    <button mat-flat-button color="primary" (click)="approveProduct(notification.product, notification)">Approve product</button>
+    <button mat-flat-button color="primary" (click)="rejectProduct(notification.product, notification)">Reject product</button>
   </mat-list-item>
 
 </div>

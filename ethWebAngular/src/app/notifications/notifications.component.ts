@@ -3,6 +3,8 @@ import {Product} from "../product.model";
 import {Notification} from "../notification.model";
 import {UserType} from "../user-type.enum";
 import {User} from "../user.model";
+import {Web3Service} from "../web3.service";
+import {not} from "rxjs/internal-compatibility";
 
 @Component({
   selector: 'app-notifications',
@@ -13,7 +15,7 @@ export class NotificationsComponent implements OnInit {
 
   notifications: Notification[] = [];
 
-  constructor() { }
+  constructor(public web3Service: Web3Service) { }
 
   ngOnInit(): void {
 
@@ -53,11 +55,13 @@ export class NotificationsComponent implements OnInit {
 
   }
 
-  approveProduct(product: Product) {
-
+  approveProduct(product: Product, notification: Notification) {
+    this.web3Service.approveProduct(product, notification).then(result => console.log('approved product ', product
+    , 'notification ', notification, result));
   }
 
-  rejectProduct(product: Product) {
-
+  rejectProduct(product: Product, notification: Notification) {
+    this.web3Service.rejectProduct(product, notification).then(result => console.log('rejected product ', product
+      , 'notification ', notification, result));
   }
 }

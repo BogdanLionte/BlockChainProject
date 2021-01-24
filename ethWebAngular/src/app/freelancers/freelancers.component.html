@@ -1,5 +1,15 @@
 <div ngClass="freelancers-list">
 
+  <br>
+  <mat-form-field appearance="fill" >
+    <mat-label>Select a project</mat-label>
+  <mat-select [(ngModel)]="selectedProduct" placeholder="Select the product" name="product" >
+    <mat-option *ngFor="let product of products" [value]="product.name">
+      {{product.name}}
+    </mat-option>
+  </mat-select>
+  </mat-form-field>
+
   <mat-list-item *ngFor="let freelancer of freelancers">
     Name: {{freelancer.name}}
     <br>
@@ -7,8 +17,11 @@
     <br>
     Reputation: {{freelancer.reputation}}
     <br>
-    <button mat-flat-button color="primary" (click)="selectFreelancer(freelancer)">Select freelancer</button>
-
+    <button *ngIf="userService.currentUser?.type === 'MANAGER'" [disabled]="!selectedProduct" [color]="freelancer.selected ? 'accent' : 'primary'" mat-flat-button (click)="selectFreelancer(freelancer)">Select freelancer</button>
+    <br>
   </mat-list-item>
+
+  <br>
+  <button *ngIf="userService.currentUser?.type === 'MANAGER'" mat-flat-button color="warn" (click)="submitFreelancers()">Submit</button>
 
 </div>
