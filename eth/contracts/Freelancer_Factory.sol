@@ -4,16 +4,14 @@ import "./TokenManager.sol";
 
 contract Freelancer_Factory {
 
-    String_Utils s;
     TokenManager public token_manager;
 
-    constructor(String_Utils _s, TokenManager _token_manager) {
-        s = _s;
+    constructor(TokenManager _token_manager) {
         token_manager = _token_manager;
     }
 
-    function create_freelancer(string memory name, string memory expertise, uint256 balance) public returns(Freelancer) {
-        Freelancer freelancer = new Freelancer(name, 5, expertise, token_manager.token(), s);
+    function create_freelancer(address addr, string memory name, string memory expertise, uint256 balance) public returns(Freelancer) {
+        Freelancer freelancer = new Freelancer(addr, name, 5, expertise, token_manager.token());
         token_manager.transfer(address(freelancer), balance);
         return freelancer;
     }

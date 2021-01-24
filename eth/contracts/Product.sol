@@ -1,5 +1,4 @@
 pragma solidity >=0.7.0 <0.8.0;
-import "./Manager.sol";
 pragma experimental ABIEncoderV2;
 
 contract Product {
@@ -11,31 +10,30 @@ contract Product {
         Canceled
     }
 
-    struct Name_Set {
-        string[] names;
-        mapping(string => bool) is_in;
-        mapping(string => uint256) indexes;
+    struct Address_Set {
+        address[] addresses;
+        mapping(address => bool) is_in;
+        mapping(address => uint256) indexes;
     }
 
 
-    string private name;
-    string private description;
-    uint256 private dev;
+    string public name;
+    string public description;
+    uint256 public dev;
     uint256 public rev;
     string public expertise_category;
-    string public manager;
+    address public manager;
     State private state;
-    mapping (string => uint256) private deposited_amounts;
-    uint256 private total_amount;
-    Name_Set private depositors;
-    Name_Set private applicants;
-    mapping (string => uint256) public applicant_amounts;
-    string public evaluator;
-    string[] private selected_team;
-    mapping (string => bool) private valid_team_names;
-    String_Utils private s;
+    mapping (address => uint256) public deposited_amounts;
+    uint256 public total_amount;
+    Address_Set private depositors;
+    Address_Set private applicants;
+    mapping (address => uint256) public applicant_amounts;
+    address public evaluator;
+    address[] private selected_team;
+    mapping (address => bool) private valid_team_addresses;
 
-    constructor(string memory _name, string memory _description, uint256 _dev, uint256 _rev, string memory _expertise_category, string memory _manager, String_Utils _s) {
+    constructor(string memory _name, string memory _description, uint256 _dev, uint256 _rev, string memory _expertise_category, address _manager) {
         name = _name;
         description = _description;
         dev = _dev;
@@ -43,7 +41,20 @@ contract Product {
         expertise_category = _expertise_category;
         manager = _manager;
         state = State.Financing;
-        s = _s;
+    }
+
+    function get_state() public view returns (string memory) {
+        if(state == State.Financing) {
+            return "FINANCING";
+        }else if(state == State.Choosing) {
+            return "CHOOSING";
+        }else if(state == State.Developing) {
+            return "DEVELOPING";
+        }else if(state == State.Done) {
+            return "DONE";
+        }else {
+            return "CANCELED";
+        }
     }
 
     function reset_team() public {
@@ -57,186 +68,94 @@ contract Product {
         state = State.Done;
     }
 
-    function get_selected_team() public view returns (string[] memory) {
+    function get_selected_team() public view returns (address[] memory) {
         return selected_team;
     }
 
-    function select_team(string[] memory team) public {
+    function select_team(address[] memory team) public {
         require(state == State.Choosing, "you cannot select a team in this state");
         uint team_sum = 0;
         for(uint i = 0; i < team.length; i++) {
             team_sum += applicant_amounts[team[i]];
-            valid_team_names[team[i]] = true;
+            valid_team_addresses[team[i]] = true;
         }
         require(team_sum == dev, "you chose a team that is too costly or too cheap");
         selected_team = team;
         state = State.Developing;
     }
 
-    function is_valid_team_member(string memory team_member_name) public view returns (bool) {
-        return valid_team_names[team_member_name];
+    function is_valid_team_member(address team_member_addr) public view returns (bool) {
+        return valid_team_addresses[team_member_addr];
     }
 
-    function get_depositors() public view returns(string[] memory) {
-        return depositors.names;
+    function get_depositors() public view returns(address[] memory) {
+        return depositors.addresses;
     }
 
-    function set_evaluator(string memory _evaluator) public{
+    function set_evaluator(address _evaluator) public{
         evaluator = _evaluator;
     }
 
-    function deposit(string memory depositor, uint256 amount) public{
+    function deposit(address depositor, uint256 amount) public{
         require(state == State.Financing, "you cannot deposit in this phase");
         deposited_amounts[depositor] += amount;
         total_amount += amount;
 
-        add_name_to_set(depositor, depositors);
+        add_addr_to_set(depositor, depositors);
 
         if(total_amount >= rev + dev) {
             state = State.Choosing;
         }
     }
 
-    function dev_apply(string memory applicant, uint256 amount) public {
+    function dev_apply(address applicant, uint256 amount) public {
         require(state == State.Choosing, "you cannot apply in this phase");
         require(amount <= dev, "you cannot demand more than the total development amount");
         applicant_amounts[applicant] = amount;
-        add_name_to_set(applicant, applicants);
+        add_addr_to_set(applicant, applicants);
     }
 
-    function withdraw(string memory depositor, uint256 amount) public {
+    function withdraw(address depositor, uint256 amount) public {
         require(state == State.Financing, "you cannot withdraw in this state");
+        require(amount <= deposited_amounts[depositor], "you cannot withdraw more than you deposited!");
         deposited_amounts[depositor] -= amount;
         total_amount -= amount;
         if(deposited_amounts[depositor] == 0) {
-            remove_name_from_set(depositor, depositors);
+            remove_addr_from_set(depositor, depositors);
         }
     }
 
     function cancel() public{
         require(state == State.Financing, "The product can only be canceled during the financing phase");
         state = State.Canceled;
-        for(uint i = 0; i < depositors.names.length; i++) {
-            deposited_amounts[depositors.names[i]] = 0;
-            depositors.is_in[depositors.names[i]] = false;
-            depositors.indexes[depositors.names[i]] = 0;
+        for(uint i = 0; i < depositors.addresses.length; i++) {
+            deposited_amounts[depositors.addresses[i]] = 0;
+            depositors.is_in[depositors.addresses[i]] = false;
+            depositors.indexes[depositors.addresses[i]] = 0;
         }
-        delete depositors.names;
+        delete depositors.addresses;
     }
 
-    function get_contribution(string memory contributor) public view returns (uint256) {
+    function get_contribution(address contributor) public view returns (uint256) {
         return deposited_amounts[contributor];
     }
 
-    function add_name_to_set(string memory new_name, Name_Set storage name_set) private {
-        if(!name_set.is_in[new_name]) {
-            name_set.names.push(new_name);
-            name_set.is_in[new_name] = true;
-            name_set.indexes[new_name] = name_set.names.length; //save the incremented index in this mapping in order to distinguish for 0 values
+    function add_addr_to_set(address new_addr, Address_Set storage addr_set) private {
+        if(!addr_set.is_in[new_addr]) {
+            addr_set.addresses.push(new_addr);
+            addr_set.is_in[new_addr] = true;
+            addr_set.indexes[new_addr] = addr_set.addresses.length; //save the incremented index in this mapping in order to distinguish for 0 values
         }
     }
 
-    function remove_name_from_set(string memory old_name, Name_Set storage name_set) private {
-        if(name_set.is_in[old_name]) {
-            uint256 index = name_set.indexes[old_name] - 1;
-            name_set.names[index] = name_set.names[name_set.names.length - 1];
-            name_set.names.pop();
-            name_set.is_in[old_name] = false;
-            name_set.indexes[old_name] = 0;
+    function remove_addr_from_set(address old_addr, Address_Set storage addr_set) private {
+        if(addr_set.is_in[old_addr]) {
+            uint256 index = addr_set.indexes[old_addr] - 1;
+            addr_set.addresses[index] = addr_set.addresses[addr_set.addresses.length - 1];
+            addr_set.addresses.pop();
+            addr_set.is_in[old_addr] = false;
+            addr_set.indexes[old_addr] = 0;
         }
     }
 
-    function compare_strings(string memory a, string memory b) private pure returns (bool) {
-        return keccak256(bytes(a)) == keccak256(bytes(b));
-    }
-
-    function to_string() public view returns (string memory) {
-        string memory json = "{\n\"name\": \"";
-        json = s.concatenate(json, name);
-        json = s.concatenate(json, "\", \n\"description\": \"");
-        json = s.concatenate(json, description);
-        json = s.concatenate(json, "\", \n\"dev\": ");
-        json = s.concatenate(json, s.uint2str(dev));
-        json = s.concatenate(json, ", \n\"rev\": ");
-        json = s.concatenate(json, s.uint2str(rev));
-        json = s.concatenate(json, ", \n\"expertise\": \"");
-        json = s.concatenate(json, expertise_category);
-        json = s.concatenate(json, "\", \n\"manager\": \"");
-        json = s.concatenate(json, manager);
-        json = s.concatenate(json, "\", \n\"evaluator\": \"");
-        json = s.concatenate(json, evaluator);
-        json = s.concatenate(json, "\", \n\"state\": \"");
-        if(state == State.Financing) {
-            json = s.concatenate(json, "Financing");
-        }
-        else if(state == State.Choosing) {
-            json = s.concatenate(json, "Choosing");
-        }
-        else if(state == State.Done) {
-            json = s.concatenate(json, "Done");
-        }
-        else if(state == State.Developing){
-            json = s.concatenate(json, "Developing");
-        }
-        else if(state == State.Done) {
-            json = s.concatenate(json, "Done");
-        }
-        else {
-            json = s.concatenate(json, "Canceled");
-        }
-
-        json = s.concatenate(json, "\", \n\"deposited_amounts\": {");
-        if(depositors.names.length > 0){
-            for(uint i = 0; i < depositors.names.length - 1; i++) {
-                json = s.concatenate(json, "\n\"");
-                json = s.concatenate(json, depositors.names[i]);
-                json = s.concatenate(json, "\": ");
-                json = s.concatenate(json, s.uint2str(deposited_amounts[depositors.names[i]]));
-                json = s.concatenate(json, ", ");
-            }
-
-
-            json = s.concatenate(json, "\n\"");
-            json = s.concatenate(json, depositors.names[depositors.names.length - 1]);
-            json = s.concatenate(json, "\": ");
-            json = s.concatenate(json, s.uint2str(deposited_amounts[depositors.names[depositors.names.length - 1]]));
-        }
-
-        json = s.concatenate(json, "\n}, \n\"total_amount\": ");
-        json = s.concatenate(json, s.uint2str(total_amount));
-        json = s.concatenate(json, "\", \n\"applicant_amounts\": {");
-
-        if(applicants.names.length > 0){
-            for(uint i = 0; i < applicants.names.length - 1; i++) {
-                json = s.concatenate(json, "\n\"");
-                json = s.concatenate(json, applicants.names[i]);
-                json = s.concatenate(json, "\": ");
-                json = s.concatenate(json, s.uint2str(applicant_amounts[applicants.names[i]]));
-                json = s.concatenate(json, ", ");
-            }
-
-
-            json = s.concatenate(json, "\n\"");
-            json = s.concatenate(json, applicants.names[applicants.names.length - 1]);
-            json = s.concatenate(json, "\": ");
-            json = s.concatenate(json, s.uint2str(applicant_amounts[applicants.names[applicants.names.length - 1]]));
-        }
-
-        json = s.concatenate(json, "\n}, \n\"selected_team\": [");
-
-        if(selected_team.length > 0) {
-            json = s.concatenate(json, "\"");
-            for(uint i = 0; i < selected_team.length - 1; i++) {
-                json = s.concatenate(json, selected_team[i]);
-                json = s.concatenate(json, "\", \"");
-            }
-            json = s.concatenate(json, selected_team[selected_team.length - 1]);
-            json = s.concatenate(json, "\"");
-        }
-        json = s.concatenate(json, "]\n");
-
-        json = s.concatenate(json, "\n}");
-
-        return json;
-    }
 }

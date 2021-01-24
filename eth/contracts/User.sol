@@ -1,20 +1,17 @@
 pragma solidity >=0.7.0 <0.8.0;
 import "./Token.sol";
-import "./String_Utils.sol";
 
 abstract contract  User {
 
-    string internal name;
+    string public name;
 
     Token internal token;
 
-    bool public was_notified;
-
-    uint8 internal reputation;
+    uint8 public reputation;
 
     string public expertise_category;
 
-    String_Utils internal s;
+    address public addr;
 
     function increment_reputation() public {
         if(reputation < 10) {
@@ -28,19 +25,13 @@ abstract contract  User {
         }
     }
 
-    function notify() public {
-        was_notified = true;
-    }
-
-    function denotify() public {
-        was_notified = false;
-    }
-
     function transfer(address to, uint256 amount) public {
         token.transfer(to, amount);
     }
 
-    function to_string() public view virtual returns (string memory);
+    function get_balance() public view returns(uint){
+        return token.balanceOf(address(this));
+    }
 
-    function user_type() public pure virtual returns (string memory);
+    function user_type() public pure virtual returns (uint8);
 }

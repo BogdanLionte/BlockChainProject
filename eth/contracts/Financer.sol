@@ -4,24 +4,13 @@ import "./User.sol";
 
 contract Financer is User {
 
-
-    function to_string() public view override returns (string memory) {
-        string memory json;
-        json = "{\n\"name\": \"";
-        json = s.concatenate(json, name);
-        json = s.concatenate(json, "\", \n\"type\": \"FINANCER\", \n\"balance\": ");
-        json = s.concatenate(json, s.uint2str(token.balanceOf(address(this))));
-        json = s.concatenate(json, "\n}");
-        return json;
+    function user_type() public pure override returns (uint8) {
+        return 1;
     }
 
-    function user_type() public pure override returns (string memory) {
-        return "FINANCER";
-    }
-
-    constructor (string memory _name, Token _token, String_Utils _s) {
+    constructor (address _addr, string memory _name, Token _token) {
+        addr = _addr;
         name = _name;
         token = Token(_token);
-        s = String_Utils(_s);
     }
 }

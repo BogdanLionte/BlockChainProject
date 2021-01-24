@@ -4,16 +4,14 @@ import "./TokenManager.sol";
 
 contract Financer_Factory {
 
-    String_Utils s;
     TokenManager public token_manager;
 
-    constructor(String_Utils _s, TokenManager _token_manager) {
-        s = _s;
+    constructor(TokenManager _token_manager) {
         token_manager = _token_manager;
     }
 
-    function create_financer(string memory name, uint256 balance) public returns (Financer) {
-        Financer financer = new Financer(name, token_manager.token(), s);
+    function create_financer(address addr, string memory name, uint256 balance) public returns (Financer) {
+        Financer financer = new Financer(addr, name, token_manager.token());
         token_manager.transfer(address(financer), balance);
         return financer;
     }
