@@ -84,6 +84,10 @@ contract Product {
         return selected_team;
     }
 
+    function get_applicants() public view returns (address[] memory) {
+        return applicants.addresses;
+    }
+
     function select_team(address[] memory team) public {
         require(state == State.Choosing, "you cannot select a team in this state");
         uint team_sum = 0;

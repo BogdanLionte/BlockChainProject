@@ -30,6 +30,7 @@ contract Marketplace {
     struct Notification_Struct {
         uint256 id;
         string message;
+        string prod_name;
     }
 
     struct User_Struct {
@@ -51,6 +52,7 @@ contract Marketplace {
         string state;
         address[] depositors;
         address[] team;
+        address[] applicants;
         address evaluator;
         uint256 total_amount;
     }
@@ -143,6 +145,7 @@ contract Marketplace {
         User freelancer = addresses_users[freelancer_addr];
         require(compare_strings(freelancer.expertise_category(), prod.expertise_category()), "you cannot apply for a project in this category");
         prod.dev_apply(freelancer_addr, amount);
+        prod_structs[prod_struct_indexes[prod_name]].applicants = prod.get_applicants();
     }
 
     function register_evaluator(string memory prod_name) public{
@@ -173,7 +176,7 @@ contract Marketplace {
         validate_prod(prod_name);
         Product prod = name_products[prod_name];
         require(prod.is_valid_team_member(msg.sender), "invalid user");
-        add_notification(prod.manager(), message);
+        add_notification(prod.manager(), message, prod_name);
     }
 
     function accept_product(string memory prod_name, uint256 notification_id) public{
@@ -203,7 +206,7 @@ contract Marketplace {
         Product prod = name_products[prod_name];
         require(msg.sender == prod.manager(), "invalid user");
         require(prod.evaluator() != address(0), "the evaluator was not set");
-        add_notification(prod.evaluator(), message);
+        add_notification(prod.evaluator(), message, prod_name);
         remove_notification(prod.manager(), notification_id);
         prod.set_arbitrage(true);
     }
@@ -250,8 +253,8 @@ contract Marketplace {
         return prod_structs;
     }
 
-    function get_notifications(address user_addr) public view returns(Notification_Struct[] memory) {
-        return notifications[user_addr];
+    function get_notifications() public view returns(Notification_Struct[] memory) {
+        return notifications[msg.sender];
     }
 
     function get_depositor_amount(string memory prod_name, address depositor_addr) public view returns (uint256) {
@@ -298,6 +301,7 @@ contract Marketplace {
         result.team = prod.get_selected_team();
         result.evaluator = prod.evaluator();
         result.total_amount = prod.total_amount();
+        result.applicants = prod.get_applicants();
 
         return result;
     }
@@ -306,10 +310,11 @@ contract Marketplace {
         return keccak256(bytes(a)) == keccak256(bytes(b));
     }
 
-    function add_notification(address addr, string memory message) private {
+    function add_notification(address addr, string memory message, string memory prod_name) private {
         Notification_Struct memory notif;
         notif.message = message;
         notif.id = current_notification_id;
+        notif.prod_name = prod_name;
         current_notification_id++;
         notifications[addr].push(notif);
         notification_indexes[notif.id] = notifications[addr].length;
