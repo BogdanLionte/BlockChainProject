@@ -32,6 +32,7 @@ contract Product {
     address public evaluator;
     address[] private selected_team;
     mapping (address => bool) private valid_team_addresses;
+    bool private arbitrage;
 
     constructor(string memory _name, string memory _description, uint256 _dev, uint256 _rev, string memory _expertise_category, address _manager) {
         name = _name;
@@ -41,6 +42,14 @@ contract Product {
         expertise_category = _expertise_category;
         manager = _manager;
         state = State.Financing;
+    }
+
+    function set_arbitrage(bool _arbitrage) public {
+        arbitrage = _arbitrage;
+    }
+
+    function get_arbitrage() public view returns(bool){
+        return arbitrage;
     }
 
     function get_state() public view returns (string memory) {
@@ -60,6 +69,9 @@ contract Product {
     function reset_team() public {
         require(state == State.Developing, "the team must have already been chosen in order to reset it");
         state = State.Choosing;
+        for(uint i = 0; i < selected_team.length; i++) {
+            valid_team_addresses[selected_team[i]] = false;
+        }
         delete selected_team;
     }
 
@@ -76,6 +88,7 @@ contract Product {
         require(state == State.Choosing, "you cannot select a team in this state");
         uint team_sum = 0;
         for(uint i = 0; i < team.length; i++) {
+            require(applicants.is_in[team[i]], "you cannot select a freelancer who did not apply");
             team_sum += applicant_amounts[team[i]];
             valid_team_addresses[team[i]] = true;
         }

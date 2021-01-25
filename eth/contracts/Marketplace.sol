@@ -18,21 +18,14 @@ contract Marketplace {
 
     mapping(address => User) private addresses_users;
     mapping(string => Product) private name_products;
-    string[] private prod_names;
-    address[] private user_addresses;
-    mapping(address => bool) private valid_addresses;
-    mapping(string => bool) private valid_products;
     mapping(address => Notification_Struct[]) private notifications;
     mapping(uint256 => uint) private notification_indexes;
     uint256 current_notification_id;
     User_Struct[] private user_structs;
     Product_Struct[] private prod_structs;
-
-    Product_Factory private pf;
-    Manager_Factory private mf;
-    Evaluator_Factory private ef;
-    Freelancer_Factory private frf;
-    Financer_Factory private fif;
+    mapping(string => uint256) prod_struct_indexes;
+    mapping(address => uint256) user_struct_indexes;
+    Product_Factory pf;
 
     struct Notification_Struct {
         uint256 id;
@@ -62,175 +55,191 @@ contract Marketplace {
         uint256 total_amount;
     }
 
-    constructor(Product_Factory _pf, Manager_Factory _mf, Evaluator_Factory _ef, Freelancer_Factory _frf, Financer_Factory _fif) {
+    constructor(Product_Factory _pf, Manager_Factory mf, Evaluator_Factory ef, Freelancer_Factory frf, Financer_Factory fif) {
+
         pf = _pf;
-        mf = _mf;
-        ef = _ef;
-        frf = _frf;
-        fif = _fif;
 
-        address manager_1_addr = 0x00EEE5B6d925Eeedff2f4A4AC5f6bd361e2ff1ab;
-        Manager manager = mf.create_manager(manager_1_addr, "manager_1", 75);
-        add_user(manager_1_addr, manager);
+        address manager_1_addr = 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4;
+        add_user(manager_1_addr, mf.create_manager(manager_1_addr, "manager_1", 75));
 
-        address financer_1_addr = 0x5f1546f27111f9D4785ebF6ebc2FD8f48AE3eB93;
-        Financer financer_1 = fif.create_financer(financer_1_addr, "financer_1", 200);
-        add_user(financer_1_addr, financer_1);
+        address financer_1_addr = 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2;
+        add_user(financer_1_addr, fif.create_financer(financer_1_addr, "financer_1", 200));
 
-        address financer_2_addr = 0x129fEb8F88b85A97112A75F22D6C4eCa6d303c10;
-        Financer financer_2 = fif.create_financer(financer_2_addr, "financer_2", 300);
-        add_user(financer_2_addr, financer_2);
+        address financer_2_addr = 0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db;
+        add_user(financer_2_addr, fif.create_financer(0x129fEb8F88b85A97112A75F22D6C4eCa6d303c10, "financer_2", 300));
 
-        address financer_3_addr = 0x1D4b0B98112F4C7039Fc83BF9E8e72D2509FC5f4;
-        Financer financer_3 = fif.create_financer(financer_3_addr, "financer_3", 250);
-        add_user(financer_3_addr, financer_3);
+        address financer_3_addr = 0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB;
+        add_user(financer_3_addr, fif.create_financer(financer_3_addr, "financer_3", 250));
 
-        address freelancer_1_addr = 0x5BE58C8cd70f07f9Ad8Eac2473e5ca8338f1A471;
-        Freelancer freelancer_1 = frf.create_freelancer(freelancer_1_addr, "freelancer_1", "databases", 50);
-        add_user(freelancer_1_addr, freelancer_1);
+        address freelancer_1_addr = 0x617F2E2fD72FD9D5503197092aC168c91465E7f2;
+        add_user(freelancer_1_addr, frf.create_freelancer(freelancer_1_addr, "freelancer_1", "databases", 50));
 
-        address freelancer_2_addr = 0xA204D42966deE8Ee61B3193924904203Ab981F30;
-        Freelancer freelancer_2 = frf.create_freelancer(freelancer_2_addr, "freelancer_2", "databases", 50);
-        add_user(freelancer_2_addr, freelancer_2);
+        address freelancer_2_addr = 0x17F6AD8Ef982297579C203069C1DbfFE4348c372;
+        add_user(freelancer_2_addr, frf.create_freelancer(freelancer_2_addr, "freelancer_2", "databases", 50));
 
-        address freelancer_3_addr = 0x30b33dD0C4880D601D690af786cbf160ee06BcC2;
-        Freelancer freelancer_3 = frf.create_freelancer(freelancer_3_addr, "freelancer_3", "javascript", 25);
-        add_user(freelancer_3_addr, freelancer_3);
+        address freelancer_3_addr = 0x5c6B0f7Bf3E7ce046039Bd8FABdfD3f9F5021678;
+        add_user(freelancer_3_addr, frf.create_freelancer(freelancer_3_addr, "freelancer_3", "javascript", 25));
 
-        address evaluator_1_addr = 0xD8f6CFADaDB075e639c4d6163D7b4F8cD1E306ae;
-        Evaluator evaluator_1 = ef.create_evaluator(evaluator_1_addr, "evaluator_1", "databases", 25);
-        add_user(evaluator_1_addr, evaluator_1);
+        address evaluator_1_addr = 0x03C6FcED478cBbC9a4FAB34eF9f40767739D1Ff7;
+        add_user(evaluator_1_addr, ef.create_evaluator(evaluator_1_addr, "evaluator_1", "databases", 25));
 
-        address evaluator_2_addr = 0xc7A09e3bfAD1E19e219291EA10b8762Ad7498D38;
-        Evaluator evaluator_2 = ef.create_evaluator(evaluator_2_addr, "evaluator_2", "javascript", 25);
-        add_user(evaluator_2_addr, evaluator_2);
+        address evaluator_2_addr = 0x1aE0EA34a72D944a8C7603FfB3eC30a6669E454C;
+        add_user(evaluator_2_addr, ef.create_evaluator(evaluator_2_addr, "evaluator_2", "javascript", 25));
     }
 
-    function create_product(address manager_addr, string memory product_name, string memory product_description, uint256 dev, uint256 rev, string memory expertise_category) public{
-        require(is_user_valid(manager_addr, 0), "invalid user address");
-        require(!valid_products[product_name], "the product name is not unique");
+    function create_product(string memory product_name, string memory product_description, uint256 dev, uint256 rev, string memory expertise_category) public{
+        address manager_addr = msg.sender;
+        validate_user(manager_addr, 0);
+        require(address(name_products[product_name]) == address(0), "the product name is not unique");
         Product prod = pf.create_product(manager_addr, product_name, product_description, dev, rev, expertise_category);
         name_products[product_name] = prod;
-        prod_names.push(product_name);
-        valid_products[product_name] = true;
         prod_structs.push(get_product_struct(product_name));
+        prod_struct_indexes[product_name] = prod_structs.length - 1;
     }
 
-    function deposit(string memory prod_name, address financer_addr, uint256 amount) public {
-        require(valid_products[prod_name], "you must provide a valid product name");
-        require(is_user_valid(financer_addr, 1), "invalid user address");
+    function deposit(string memory prod_name, uint256 amount) public{
+        address financer_addr = msg.sender;
+        validate_prod(prod_name);
+        validate_user(financer_addr, 1);
         address manager_addr = name_products[prod_name].manager();
-        address recipient = address(addresses_users[manager_addr]);
-        User sender = addresses_users[financer_addr];
-        sender.transfer(recipient, amount);
+        transfer(financer_addr, manager_addr, amount);
         Product prod = name_products[prod_name];
         prod.deposit(financer_addr, amount);
+        prod_structs[prod_struct_indexes[prod_name]].depositors = prod.get_depositors();
+        prod_structs[prod_struct_indexes[prod_name]].state = prod.get_state();
+        prod_structs[prod_struct_indexes[prod_name]].total_amount += amount;
     }
 
-    function withdraw(string memory prod_name, address financer_addr, uint256 amount) public {
-        require(valid_products[prod_name], "you must provide a valid product name");
-        require(is_user_valid(financer_addr, 1), "invalid user addr");
-        address recipient = address(addresses_users[financer_addr]);
+    function withdraw(string memory prod_name, uint256 amount) public{
+        address financer_addr = msg.sender;
+        validate_prod(prod_name);
+        validate_user(financer_addr, 1);
         Product prod = name_products[prod_name];
-        User sender = addresses_users[prod.manager()];
-        sender.transfer(recipient, amount);
+        transfer(prod.manager(), financer_addr, amount);
         prod.withdraw(financer_addr, amount);
+        prod_structs[prod_struct_indexes[prod_name]].depositors = prod.get_depositors();
+        prod_structs[prod_struct_indexes[prod_name]].total_amount -= amount;
     }
 
-    function cancel(address manager_addr, string memory prod_name) public {
-        require(valid_products[prod_name], "you must provide a valid product name");
-        require(is_user_valid(manager_addr, 0), "invalid user addr");
-        require(manager_addr == name_products[prod_name].manager(), "the manager you provided is not in charge of this project");
+    function cancel(string memory prod_name) public{
         Product prod = name_products[prod_name];
+        validate_prod(prod_name);
+        require(msg.sender == prod.manager(), "invalid user");
         address[] memory depositors = prod.get_depositors();
-        User sender = addresses_users[prod.manager()];
         for(uint i = 0; i < depositors.length; i++) {
-            address recipient = address(addresses_users[depositors[i]]);
             uint amount = prod.get_contribution(depositors[i]);
-            sender.transfer(recipient, amount);
+            transfer(prod.manager(), depositors[i], amount);
         }
         prod.cancel();
+        prod_structs[prod_struct_indexes[prod_name]].state = prod.get_state();
+        prod_structs[prod_struct_indexes[prod_name]].depositors = prod.get_depositors();
     }
 
-    function apply_freelancer(address freelancer_addr, string memory prod_name, uint256 amount) public {
-        require(valid_products[prod_name], "you must provide a valid product name");
-        require(is_user_valid(freelancer_addr, 2), "invalid user addr");
+    function apply_freelancer(string memory prod_name, uint256 amount) public{
+        address freelancer_addr = msg.sender;
+        validate_prod(prod_name);
+        validate_user(freelancer_addr, 2);
         Product prod = name_products[prod_name];
         User freelancer = addresses_users[freelancer_addr];
         require(compare_strings(freelancer.expertise_category(), prod.expertise_category()), "you cannot apply for a project in this category");
         prod.dev_apply(freelancer_addr, amount);
     }
 
-    function register_evaluator(address evaluator_addr, string memory prod_name) public {
-        require(valid_products[prod_name], "you must provide a valid product name");
-        require(is_user_valid(evaluator_addr, 3), "invalid user addr");
+    function register_evaluator(string memory prod_name) public{
+        address evaluator_addr = msg.sender;
+        validate_prod(prod_name);
+        validate_user(evaluator_addr, 3);
         Product prod = name_products[prod_name];
         User evaluator = addresses_users[evaluator_addr];
         require(compare_strings(evaluator.expertise_category(), prod.expertise_category()), "you cannot apply for a project in this category");
+        require(prod.evaluator() == address(0), "evaluator was already set");
         prod.set_evaluator(evaluator_addr);
+        prod_structs[prod_struct_indexes[prod_name]].evaluator = prod.evaluator();
     }
 
     function select_team(string memory prod_name, address[] memory team) public{
-        require(valid_products[prod_name], "you must provide a valid product name");
+        validate_prod(prod_name);
         Product prod = name_products[prod_name];
+        require(msg.sender == prod.manager(), "invalid user");
         for(uint i = 0; i < team.length; i++) {
-            require(valid_addresses[team[i]], "one of the team members is not a valid user");
-            require(addresses_users[team[i]].user_type() == 2, "one of the team members is not a freelancer");
+            validate_user(team[i], 2);
         }
         prod.select_team(team);
+        prod_structs[prod_struct_indexes[prod_name]].team = prod.get_selected_team();
+        prod_structs[prod_struct_indexes[prod_name]].state = prod.get_state();
     }
 
-    function notify_manager_of_product(string memory prod_name, string memory message) public {
-        require(valid_products[prod_name], "you must provide a valid product name");
+    function notify_manager_of_product(string memory prod_name, string memory message) public{
+        validate_prod(prod_name);
         Product prod = name_products[prod_name];
+        require(prod.is_valid_team_member(msg.sender), "invalid user");
         add_notification(prod.manager(), message);
     }
 
-    function accept_product(string memory prod_name, uint256 notification_id) public {
-        require(valid_products[prod_name], "you must provide a valid product name");
+    function accept_product(string memory prod_name, uint256 notification_id) public{
+        validate_prod(prod_name);
         Product prod = name_products[prod_name];
+        require(msg.sender == prod.manager());
         address[] memory team = prod.get_selected_team();
         User manager = addresses_users[prod.manager()];
         for(uint i = 0; i < team.length; i++) {
-            User team_member = addresses_users[team[i]];
-            manager.transfer(address(team_member), prod.applicant_amounts(team[i]));
-            team_member.increment_reputation();
+            transfer(prod.manager(), team[i], prod.applicant_amounts(team[i]));
+            addresses_users[team[i]].increment_reputation();
+            user_structs[user_struct_indexes[team[i]]].reputation++;
         }
         prod.finish();
         remove_notification(prod.manager(), notification_id);
+        prod_structs[prod_struct_indexes[prod_name]].state = prod.get_state();
+        if(prod.get_arbitrage()) {
+            transfer(prod.manager(), prod.evaluator(), prod.rev());
+        } else {
+            manager.increment_reputation();
+            user_structs[user_struct_indexes[prod.manager()]].reputation++;
+        }
     }
 
-    function refuse_product(string memory prod_name, string memory message, uint256 notification_id) public {
-        require(valid_products[prod_name], "you must provide a valid product name");
+    function refuse_product(string memory prod_name, string memory message, uint256 notification_id) public{
+        validate_prod(prod_name);
         Product prod = name_products[prod_name];
+        require(msg.sender == prod.manager(), "invalid user");
         require(prod.evaluator() != address(0), "the evaluator was not set");
         add_notification(prod.evaluator(), message);
         remove_notification(prod.manager(), notification_id);
-
+        prod.set_arbitrage(true);
     }
 
-    function arbitrage_accept(string memory prod_name, uint256 notification_id) public {
-        require(valid_products[prod_name], "you must provide a valid product name");
+    function arbitrage_accept(string memory prod_name, uint256 notification_id) public{
+        validate_prod(prod_name);
         Product prod = name_products[prod_name];
+        require(msg.sender == prod.evaluator(), "invalid user");
         address[] memory team = prod.get_selected_team();
         User manager = addresses_users[prod.manager()];
         for(uint i = 0; i < team.length; i++) {
-            User team_member = addresses_users[team[i]];
-            manager.transfer(address(team_member), prod.applicant_amounts(team[i]));
-            team_member.increment_reputation();
+            transfer(prod.manager(), team[i], prod.applicant_amounts(team[i]));
+            addresses_users[team[i]].increment_reputation();
+            user_structs[user_struct_indexes[team[i]]].reputation++;
         }
         manager.decrement_reputation();
-        address evaluator = address(addresses_users[prod.evaluator()]);
-        manager.transfer(evaluator, prod.rev());
+        user_structs[user_struct_indexes[prod.manager()]].reputation--;
+        transfer(prod.manager(), prod.evaluator(), prod.rev());
         prod.finish();
         remove_notification(prod.evaluator(), notification_id);
+        prod_structs[prod_struct_indexes[prod_name]].state = prod.get_state();
     }
 
-    function arbitrage_deny(string memory prod_name, uint256 notification_id) public {
-        require(valid_products[prod_name], "you must provide a valid product name");
+    function arbitrage_deny(string memory prod_name, uint256 notification_id) public{
+        validate_prod(prod_name);
         Product prod = name_products[prod_name];
+        require(msg.sender == prod.evaluator(), "invalid user");
+        address[] memory team = prod.get_selected_team();
+        for(uint i = 0; i < team.length; i++) {
+            addresses_users[team[i]].decrement_reputation();
+            user_structs[user_struct_indexes[team[i]]].reputation--;
+        }
         prod.reset_team();
         remove_notification(prod.evaluator(), notification_id);
+        prod_structs[prod_struct_indexes[prod_name]].state = prod.get_state();
+        prod_structs[prod_struct_indexes[prod_name]].team = prod.get_selected_team();
     }
 
     function get_users() public view returns (User_Struct[] memory) {
@@ -307,6 +316,7 @@ contract Marketplace {
     }
 
     function remove_notification(address addr, uint256 id) private {
+        require(notification_indexes[id] > 0, "notification does not exist");
         notifications[addr][notification_indexes[id] - 1] = notifications[addr][notifications[addr].length - 1];
         notification_indexes[notifications[addr][notifications[addr].length - 1].id] = notification_indexes[id];
         notifications[addr].pop();
@@ -315,12 +325,21 @@ contract Marketplace {
 
     function add_user(address addr, User user) private {
         addresses_users[addr] = user;
-        user_addresses.push(addr);
-        valid_addresses[addr] = true;
         user_structs.push(get_user_struct(addr));
+        user_struct_indexes[addr] = user_structs.length - 1;
     }
 
-    function is_user_valid(address addr, uint8 user_type) private view returns (bool) {
-        return valid_addresses[addr] && addresses_users[addr].user_type() == user_type;
+    function validate_user(address addr, uint8 user_type) private view{
+        require(address(addresses_users[addr]) != address(0) && addresses_users[addr].user_type() == user_type, "invalid user");
+    }
+
+    function validate_prod(string memory prod_name) private view{
+        require(address(name_products[prod_name]) != address(0), "invalid_prod");
+    }
+
+    function transfer(address sender, address recipient, uint256 amount) private {
+        addresses_users[sender].transfer(address(addresses_users[recipient]), amount);
+        user_structs[user_struct_indexes[sender]].balance = addresses_users[sender].get_balance();
+        user_structs[user_struct_indexes[recipient]].balance = addresses_users[recipient].get_balance();
     }
 }

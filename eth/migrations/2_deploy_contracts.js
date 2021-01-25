@@ -33,7 +33,7 @@ module.exports = async function (deployer) {
     await deployer.deploy(FinancerFactory, tokenManager.address);
     financerFactory = await FinancerFactory.deployed();
 
-    await deployer.deploy(Marketplace, productFactory.address, managerFactory.address, evaluatorFactory.address, freelancerFactory.address, financerFactory.address);
+    await deployer.deploy(Marketplace, productFactory.address, managerFactory.address, evaluatorFactory.address, freelancerFactory.address, financerFactory.address, {gas: 20000000});
 
 
 };
