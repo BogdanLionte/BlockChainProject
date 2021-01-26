@@ -41,6 +41,11 @@ export class Web3Service {
     return this.contract.methods.get_product_struct(product).call();
   }
 
+  async getNotifications() {
+    let currentAccount = await this.getCurrentAccount().then(accounts => accounts[0]);
+    return this.contract.methods.get_notifications(currentAccount).call();
+  }
+
   async createProduct(product: Product) {
     let currentAccount = await this.getCurrentAccount().then(accounts => accounts[0]);
     this.contract.methods.create_product(
@@ -53,11 +58,13 @@ export class Web3Service {
   }
 
   async selectFreelancer(freelancers: User[], product: Product) {
+    const listt = freelancers.map(freelancer => freelancer.address);
     let currentAccount = await this.getCurrentAccount().then(accounts => accounts[0]);
-    return this.contract.methods.select_team(
+    this.contract.methods.select_team(
       product.name,
       freelancers.map(freelancer => freelancer.address)
-    ).send({from: currentAccount, gas: 20000000});
+    ).send({from: currentAccount, gas: 20000000}).then(response => console.log('qqqq', response));
+
   }
 
   async applyForProduct(product: Product, amount: number) {
@@ -115,6 +122,30 @@ export class Web3Service {
   }
 
   async approveProduct(product: Product, notification: Notification) {
+    console.log('approving product', product);
+    console.log('approving product', notification);
+    let currentAccount = await this.getCurrentAccount().then(accounts => accounts[0]);
+    this.contract.methods.accept_product(
+      product.name,
+      notification.id
+    ).send({from: currentAccount, gas: 20000000});
+  }
+
+  async rejectProduct(product: Product, message: String, notification: Notification) {
+    console.log('prod', product);
+    console.log('message', message);
+    console.log('notif', notification);
+    let currentAccount = await this.getCurrentAccount().then(accounts => accounts[0]);
+    this.contract.methods.refuse_product(
+      product.name,
+      message,
+      notification.id
+    ).send({from: currentAccount, gas: 20000000});
+  }
+
+  async approveProductArbitrage(product: Product, notification: Notification) {
+    console.log('approving product', product);
+    console.log('approving product', notification);
     let currentAccount = await this.getCurrentAccount().then(accounts => accounts[0]);
     this.contract.methods.arbitrage_accept(
       product.name,
@@ -122,7 +153,7 @@ export class Web3Service {
     ).send({from: currentAccount, gas: 20000000});
   }
 
-  async rejectProduct(product: Product, notification: Notification) {
+  async rejectProductArbitrage(product: Product, notification: Notification) {
     let currentAccount = await this.getCurrentAccount().then(accounts => accounts[0]);
     this.contract.methods.arbitrage_deny(
       product.name,
@@ -135,6 +166,13 @@ export class Web3Service {
     this.contract.methods.register_evaluator(
       product.name,
     ).send({from: currentAccount, gas: 20000000});
+  }
+
+  async getApplicantAmount(product: Product, address: string) {
+    return this.contract.methods.get_applicant_amount(
+      product.name,
+      address
+    ).call();
   }
 
 

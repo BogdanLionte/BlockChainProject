@@ -1,7 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Product} from "./product.model";
 import {Web3Service} from "./web3.service";
-import {ProductState} from "./product-state.enum";
 import {UserService} from "./user.service";
 
 @Injectable({
@@ -16,40 +15,8 @@ export class ProductService {
 
   }
 
-  async getProduct(productName: string) {
-    return await this.web3Service.getProduct(productName).then(retrievedProduct => {
-      return {
-        name: retrievedProduct.name,
-        description: retrievedProduct.description,
-        dev: retrievedProduct.dev,
-        rev: retrievedProduct.rev,
-        totalAmount: retrievedProduct.total_amount,
-        domain: retrievedProduct.expertise,
-        state: ProductState[retrievedProduct.state as string],
-        freelancers: this.userService.getUsersFromTeam(retrievedProduct.team),
-        manager: this.userService.getUserFromAddress(retrievedProduct.manager)
-      } as Product
-    });
-  }
-
-  async getAllProducts2() {
-    const allProductNames = await this.getAllProducts().then(retrievedProducts => {
-      const productNames = [];
-      retrievedProducts.forEach(product => {
-        productNames.push(product.name);
-      });
-      return productNames;
-    });
-
-    var promises = [];
-    allProductNames.forEach(productName => {
-      promises.push(this.getProduct(productName));
-    });
-
-    return Promise.all(promises).then(products => {
-      console.log('got all full products', products);
-      return [{}] as Product[];
-    })
+  public getProductByName(productName: string) :Product {
+    return this.products.find(product => product.name === productName);
   }
 
   async getAllProducts() {
@@ -66,7 +33,9 @@ export class ProductService {
           domain: product.expertise,
           state: product.state,
           freelancers: this.userService.getUsersFromTeam(product.team),
-          manager: this.userService.getUserFromAddress(product.manager)
+          manager: this.userService.getUserFromAddress(product.manager),
+          evaluator: product.evaluator,
+          applicants: product.applicants
         } as Product);
       });
 
@@ -75,8 +44,6 @@ export class ProductService {
 
     return this.products;
   }
-
-
 
   removeProduct(product: Product) {
     return this.web3Service.removeProduct(product);

@@ -1,12 +1,14 @@
 <div ngClass="notifications-list">
 
   <mat-list-item *ngFor="let notification of notifications">
-    Product: {{notification.product.description}}
+    Product: {{notification.product?.name}}
     <br>
     Result: {{notification.result}}
     <br>
-    <button mat-flat-button color="primary" (click)="approveProduct(notification.product, notification)">Approve product</button>
-    <button mat-flat-button color="primary" (click)="rejectProduct(notification.product, notification)">Reject product</button>
+    <button *ngIf="this.userService.currentUser.type === 'MANAGER'" mat-flat-button color="primary" (click)="approveProduct(notification.product, notification)">Approve product</button>
+    <button *ngIf="this.userService.currentUser.type === 'MANAGER'" mat-flat-button color="primary" (click)="rejectProduct(notification.product, notification)">Reject product</button>
+    <button *ngIf="this.userService.currentUser.type === 'EVALUATOR'" mat-flat-button color="primary" (click)="approveProductArbitrage(notification.product, notification)">Approve product artibtrage</button>
+    <button *ngIf="this.userService.currentUser.type === 'EVALUATOR'" mat-flat-button color="primary" (click)="rejectProductArbitrage(notification.product, notification)">Reject product arbitrage</button>
   </mat-list-item>
 
 </div>

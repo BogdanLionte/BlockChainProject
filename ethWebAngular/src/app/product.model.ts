@@ -9,7 +9,8 @@ export class Product {
   domain: string;
   state: string;
   freelancers: User[];
+  evaluator: User;
   name: string;
   totalAmount: number;
-
+  applicants: string[];
 }

@@ -4,7 +4,7 @@
   <mat-form-field appearance="fill" >
     <mat-label>Select a project</mat-label>
   <mat-select [(ngModel)]="selectedProduct" placeholder="Select the product" name="product" >
-    <mat-option *ngFor="let product of products" [value]="product.name">
+    <mat-option (onSelectionChange)="productSelected(product)" *ngFor="let product of products" [value]="product">
       {{product.name}}
     </mat-option>
   </mat-select>
@@ -16,6 +16,8 @@
     Expertise: {{freelancer.expertise}}
     <br>
     Reputation: {{freelancer.reputation}}
+    <br>
+    Dev contributed: {{freelancer.dev}}
     <br>
     <button *ngIf="userService.currentUser?.type === 'MANAGER'" [disabled]="!selectedProduct" [color]="freelancer.selected ? 'accent' : 'primary'" mat-flat-button (click)="selectFreelancer(freelancer)">Select freelancer</button>
     <br>

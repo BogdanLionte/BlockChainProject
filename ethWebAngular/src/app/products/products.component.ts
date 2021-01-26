@@ -1,13 +1,12 @@
 import {Component, OnInit} from '@angular/core';
 import {Product} from "../product.model";
 import {User} from "../user.model";
-import {UserType} from "../user-type.enum";
 import {Web3Service} from "../web3.service";
 import {MatDialog} from "@angular/material/dialog";
 import {InputDialogComponent} from "../input-dialog/input-dialog.component";
 import {UserService} from "../user.service";
 import {ProductService} from "../product.service";
-import {ProductState} from "../product-state.enum";
+
 import {ActivatedRouteSnapshot, Resolve, RouterStateSnapshot} from "@angular/router";
 import {Observable} from "rxjs";
 
@@ -20,8 +19,6 @@ export class ProductsComponent implements OnInit, Resolve<User> {
 
   products: Product[] = [];
   inputDev: number;
-  productState = ProductState;
-  userType = UserType;
 
   constructor(public web3Service: Web3Service,
               public dialog: MatDialog,
@@ -35,10 +32,10 @@ export class ProductsComponent implements OnInit, Resolve<User> {
     });
   }
 
-  refreshProducts() {
+  async refreshProducts() {
     console.log('refresh products from child');
-    this.productService.getAllProducts().then(
-      products => this.products = products
+    this.products = await this.productService.getAllProducts().then(
+      products => products
     );
   }
 
@@ -61,15 +58,6 @@ export class ProductsComponent implements OnInit, Resolve<User> {
     });
 
   }
-
-  acceptProduct(product: Product) {
-
-  }
-
-  rejectProduct(product: Product) {
-
-  }
-
   removeProduct(product: Product) {
     this.productService.removeProduct(product).then(result => {
       console.log('removed product', result);
@@ -103,7 +91,9 @@ export class ProductsComponent implements OnInit, Resolve<User> {
 
     dialogRef.afterClosed().subscribe(result => {
       console.log('The dialog was closed');
-      this.web3Service.financeProduct(product, result);
+      this.web3Service.financeProduct(product, result).then(result => {
+        this.refreshProducts();
+      });
     });
 
   }
@@ -118,13 +108,16 @@ export class ProductsComponent implements OnInit, Resolve<User> {
 
     dialogRef.afterClosed().subscribe(result => {
       console.log('The dialog was closed');
-      this.web3Service.withdrawFinanceProduct(product, result);
+      this.web3Service.withdrawFinanceProduct(product, result).then(result => {
+        this.refreshProducts();
+      });
     });
 
   }
 
   applyForEvaluatingProduct(product: Product) {
-    this.web3Service.applyForEvaluatingProduct(product);
+    this.web3Service.applyForEvaluatingProduct(product).then(result => console.log('applied for evaluating'));
+    this.refreshProducts();
   }
 
   resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<User> | Promise<User> | User {

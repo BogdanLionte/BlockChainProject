@@ -13,6 +13,8 @@
     <br>
     Manager: {{product.manager.name}}
     <br>
+    Evaluator: {{userService.getUserFromAddress(product.evaluator)?.name}}
+    <br>
     State: {{product.state}}
     <br>
 
@@ -26,10 +28,10 @@
       {{freelancer.name}}
     </span>  </p>
 
-    <button *ngIf="userService.currentUser.type === 'FREELANCER'" mat-flat-button color="primary" (click)="applyForProduct(product)">Apply</button>
-    <button *ngIf="userService.currentUser.type === 'EVALUATOR'" mat-flat-button color="primary" (click)="applyForEvaluatingProduct(product)">Apply for evaluating</button>
+    <button [disabled]="product.state !== 'CHOOSING'" *ngIf="userService.currentUser.type === 'FREELANCER'" mat-flat-button color="primary" (click)="applyForProduct(product)">Apply</button>
+    <button *ngIf="userService.currentUser.type === 'EVALUATOR' && (product.state === 'DEVELOPING' || product.state === 'FINANCING')" mat-flat-button color="primary" (click)="applyForEvaluatingProduct(product)">Apply for evaluating</button>
     <button *ngIf="userService.currentUser.type === 'MANAGER' && product.state === 'FINANCING'" mat-flat-button color="primary" (click)="removeProduct(product)">Remove</button>
-    <button *ngIf="userService.currentUser.type === 'FREELANCER'" mat-flat-button color="primary" (click)="sendNotification(product)">Send notification</button>
+    <button *ngIf="userService.currentUser.type === 'FREELANCER' && product.state === 'DEVELOPING'" mat-flat-button color="primary" (click)="sendNotification(product)">Send notification</button>
     <button *ngIf="userService.currentUser.type === 'FINANCER' && product.state === 'FINANCING'" mat-flat-button color="primary" (click)="financeProduct(product)">Finance</button>
     <button *ngIf="userService.currentUser.type === 'FINANCER' && product.state === 'FINANCING'" mat-flat-button color="primary" (click)="withdrawFinanceProduct(product)">Withdraw</button>
 

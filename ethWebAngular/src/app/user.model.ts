@@ -1,5 +1,3 @@
-import {UserType} from "./user-type.enum";
-
 export class User {
 
   name: string;
@@ -8,4 +6,5 @@ export class User {
   address: string;
   type: string;
   selected?: boolean;
+  dev?: number;
 }

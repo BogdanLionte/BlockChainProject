@@ -61,31 +61,31 @@ contract Marketplace {
 
         pf = _pf;
 
-        address manager_1_addr = 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4;
+        address manager_1_addr = 0xec7935d8d2a5846C6185A40eD515EB2114e62842;
         add_user(manager_1_addr, mf.create_manager(manager_1_addr, "manager_1", 75));
 
-        address financer_1_addr = 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2;
+        address financer_1_addr = 0x42Ed7f98B64FF779CEcB9f3c3d3ACeA68db6b0a8;
         add_user(financer_1_addr, fif.create_financer(financer_1_addr, "financer_1", 200));
 
-        address financer_2_addr = 0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db;
+        address financer_2_addr = 0x5c0268F91544C5982Ea72B9Cdd0132C32F2Ae888;
         add_user(financer_2_addr, fif.create_financer(0x129fEb8F88b85A97112A75F22D6C4eCa6d303c10, "financer_2", 300));
 
-        address financer_3_addr = 0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB;
+        address financer_3_addr = 0xf57CD336f54C8618AbF5129c5A0eC81504052397;
         add_user(financer_3_addr, fif.create_financer(financer_3_addr, "financer_3", 250));
 
-        address freelancer_1_addr = 0x617F2E2fD72FD9D5503197092aC168c91465E7f2;
+        address freelancer_1_addr = 0xEf21CC357040F16Ef9B2cC760D62CA41487C6d6a;
         add_user(freelancer_1_addr, frf.create_freelancer(freelancer_1_addr, "freelancer_1", "databases", 50));
 
-        address freelancer_2_addr = 0x17F6AD8Ef982297579C203069C1DbfFE4348c372;
+        address freelancer_2_addr = 0xB1C73A2BCDcfa26e99AC52232F1Cfcb4257295EC;
         add_user(freelancer_2_addr, frf.create_freelancer(freelancer_2_addr, "freelancer_2", "databases", 50));
 
-        address freelancer_3_addr = 0x5c6B0f7Bf3E7ce046039Bd8FABdfD3f9F5021678;
+        address freelancer_3_addr = 0x557Db40E309d7974365Adae786BEbf9bd4f07ECB;
         add_user(freelancer_3_addr, frf.create_freelancer(freelancer_3_addr, "freelancer_3", "javascript", 25));
 
-        address evaluator_1_addr = 0x03C6FcED478cBbC9a4FAB34eF9f40767739D1Ff7;
+        address evaluator_1_addr = 0xEd8702aD6b0E6B90706A1f5f5D90a2AFEF0d098A;
         add_user(evaluator_1_addr, ef.create_evaluator(evaluator_1_addr, "evaluator_1", "databases", 25));
 
-        address evaluator_2_addr = 0x1aE0EA34a72D944a8C7603FfB3eC30a6669E454C;
+        address evaluator_2_addr = 0x1d14897320Fc61E73675Ac3a8A3f3ff88ff5d10E;
         add_user(evaluator_2_addr, ef.create_evaluator(evaluator_2_addr, "evaluator_2", "javascript", 25));
     }
 
@@ -253,8 +253,8 @@ contract Marketplace {
         return prod_structs;
     }
 
-    function get_notifications() public view returns(Notification_Struct[] memory) {
-        return notifications[msg.sender];
+    function get_notifications(address addr) public view returns(Notification_Struct[] memory) {
+        return notifications[addr];
     }
 
     function get_depositor_amount(string memory prod_name, address depositor_addr) public view returns (uint256) {
